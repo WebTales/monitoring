@@ -1,0 +1,21 @@
+[Mails]
+# Emails which will receive the notification
+# Atleast one mail should be here
+# email: Name, eg foo@bar.com: Foo Bar
+[Mandrill]
+# Mandrill api key of the account which will send emails
+# Required
+# apikey: MyApiKey
+[Tutum]
+# Tutum connection informations, token and username
+# Both required
+# token: TutumToken
+# username: TutumUsername
+[Exclude]
+# Containers which will not trigger a notification when they are stopped
+# Optional
+# Base on name starts with. eg: DATA:, all containers which have a name which starts with DATA will be ignored
+[Manual_Url]
+# Add here extra domains names that you want to monitor
+# Optional
+# eg: foobar.com:
