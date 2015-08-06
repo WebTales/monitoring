@@ -40,7 +40,6 @@ def on_message(ws, message):
         if type == "auth":
             print("Auth completed")
         elif type == "container" and msg_as_JSON.get("action") == "update" and msg_as_JSON.get("state") == "Stopped":
-            print("{}".format(msg_as_JSON.get("resource_uri")))
             call_api(msg_as_JSON.get("resource_uri"))
 
 
@@ -53,7 +52,7 @@ def main(parms):
     config = monitoring.checkconfig(parms)
     PARAMS = monitoring.loadconfig(config)
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp('wss://stream.tutum.co/v1/events?token={}&user={}'.format(PARAMS.get('TOKEN'), PARAMS.get('USERNAME')),
+    ws = websocket.WebSocketApp('wss://stream.tutum.co/v1/events?token={0}&user={1}'.format(PARAMS.get('TOKEN'), PARAMS.get('USERNAME')),
                                 on_message=on_message,
                                 on_error=on_error,
                                 on_close=on_close,
