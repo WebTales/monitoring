@@ -1,7 +1,7 @@
 #!python
 import sys
 import requests
-
+from datetime import datetime
 import time
 import monitoring
 
@@ -43,6 +43,9 @@ def get_vhosts(servicesUrl):
         for env in service.get("container_envvars"):
             if env["key"] == "VIRTUAL_HOST":
                 for vhost in env["value"].split(':'):
+                    if vhost == "demo.rubedo-project.org":
+                        if datetime.now().minute > 57 or datetime.now().minute < 8:
+                            continue
                     current_vhosts.append(vhost)
             if env["key"] == "DONT_MONITOR":
                 if env["value"] == "true":
