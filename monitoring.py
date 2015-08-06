@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/python
 import ConfigParser
 import sys
 import getopt

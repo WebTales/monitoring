@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/python
 import sys
 import websocket
 import json

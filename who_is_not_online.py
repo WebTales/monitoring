@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/python
 import sys
 import requests
 from datetime import datetime
@@ -16,6 +16,8 @@ def list_services_url(services, servicesUrl):
         prefixName = service["name"].split("-")
         now = time.time() + time.altzone
         deployedTime = time.mktime(time.strptime(service["deployed_datetime"], "%a, %d %b %Y %H:%M:%S +0000"))
+        if service["started_datetime"]:
+            deployedTime = time.mktime(time.strptime(service["started_datetime"], "%a, %d %b %Y %H:%M:%S +0000"))
         diff = now - deployedTime
         if prefixName[0] == "APACHE" and diff > 900 and service["state"] != "Redeploying":
             servicesUrl.append(service["resource_uri"])
