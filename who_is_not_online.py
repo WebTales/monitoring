@@ -4,6 +4,7 @@ import requests
 from datetime import datetime
 import time
 import monitoring
+import pprint
 
 PARAMS = {}
 SERVICESURL = "/api/v1/service/"
@@ -45,7 +46,7 @@ def get_vhosts(servicesUrl):
         for env in service.get("container_envvars"):
             if env["key"] == "VIRTUAL_HOST":
                 for vhost in env["value"].split(':'):
-                    if vhost == "demo.rubedo-project.org":
+                    if vhost == "demo.rubedo-project.org" or vhost == "demoadmin.rubedo-project.org":
                         if datetime.now().minute > 57 or datetime.now().minute < 8:
                             continue
                     current_vhosts.append(vhost)
@@ -60,7 +61,7 @@ def get_vhosts(servicesUrl):
     return vhosts
 
 def check_status(vhosts):
-    vhosts_fail = []
+    vhosts_fail = {}
     send = True
     for vhost in vhosts:
         if vhost in ALREADYSEND:
@@ -69,12 +70,12 @@ def check_status(vhosts):
         if send:
             try:
                 session = requests.Session()
-                r = session.get("http://" + vhost, timeout=10)
+                r = session.get("http://" + vhost, timeout=20)
                 r.raise_for_status()
-            except Exception:
+            except requests.RequestException, args:
                 ALREADYSEND[vhost] = time.time()
                 print("Send an email")
-                vhosts_fail.append(vhost)
+                vhosts_fail[vhost] = pprint.pformat(args.args)
     return vhosts_fail
 
 def main(parms):
