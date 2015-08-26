@@ -20,11 +20,11 @@ MANUAL_URL = []
 CONFIGPATH = ""
 CONF = ConfigParser.ConfigParser()
 
-def send_mail_ws(name, uuid):
+def send_mail_ws(name, uuid, logs):
     message = {
         'from_email': 'monitor@webtales.fr',
         'from_name': 'Monitoring Rubedo',
-        'html': "<h1>Monitoring</h1><p>The container <strong><a href='" + CONTAINERLINK + uuid + "/#container-logs' >" + name + "</a></strong> went down !</p>",
+        'html': "<h1>Monitoring</h1><p>The container <strong><a href='" + CONTAINERLINK + uuid + "/#container-logs' >" + name + "</a></strong> went down !</p><h3>Logs</h3><pre style='background-color: black; color: cornsilk'>"+logs+"</pre>",
         'subject': 'Monitoring Detection for ' + name,
         'to': EMAILS
     }
@@ -32,25 +32,19 @@ def send_mail_ws(name, uuid):
     pprint.pprint(result)
 
 def send_mail_vhost(vhosts):
-    if len(vhosts) == 1:
-        message = {
-            'from_email': 'monitor@webtales.fr',
-            'from_name': 'Monitoring Rubedo',
-            'html': "<h1>Monitoring</h1><p>The website <strong><a href='" + "http://" + vhosts[0] + "' >" + vhosts[0] + "</a></strong> is not responding !</p>",
-            'subject': 'Monitoring Detection for ' + vhosts[0],
-            'to': EMAILS
-        }
-    else:
-        body = "<h1>Monitoring</h1>"
-        for vhost in vhosts:
-            body = body + "<p>The website <strong><a href='" + "http://" + vhost + "' >" + vhost + "</a></strong> is not responding !</p>"
-        message = {
-            'from_email': 'monitor@webtales.fr',
-            'from_name': 'Monitoring Rubedo',
-            'html': body,
-            'subject': 'Monitoring Detection for multiple websites',
-            'to': EMAILS
-        }
+    body = "<h1>Monitoring</h1>"
+    subject = 'Monitoring Detection for multiple websites'
+    for vhost in vhosts:
+        body = body + "<h3>"+vhost+"</h3><p>The website <strong><a href='" + "http://" + vhost + "' >" + vhost + "</a></strong> is not responding !</p><div><strong>Error(s) :</strong></div><pre>"+vhosts[vhost]+"</pre></br>"
+        if len(vhosts) == 1:
+            subject = 'Monitoring Detection for ' + vhost
+    message = {
+        'from_email': 'monitor@webtales.fr',
+        'from_name': 'Monitoring Rubedo',
+        'html': body,
+        'subject': subject,
+        'to': EMAILS
+    }
     result = MANDRILL_CLIENT.messages.send(message=message, async=False)
     pprint.pprint(result)
 
@@ -69,14 +63,14 @@ def checkconfig(argv):
                    'monitoring.py --config ABSOLUTE_PATH_TO_CONFIG_FILE')
             sys.exit()
         elif opt in ("-c", "--config"):
-            if arg.startswith("/"):
-                print(arg)
-                CONFIGPATH = arg
-                CONF.read(arg)
-                configgiven = True
-            else:
-                print('Absolute path is required')
-                sys.exit(2)
+            # if arg.startswith("/"):
+            print(arg)
+            CONFIGPATH = arg
+            CONF.read(arg)
+            configgiven = True
+            # else:
+            #     print('Absolute path is required')
+            #     sys.exit(2)
     if not configgiven:
         print('Config file missing.\n'
               'monitoring.py -c ABSOLUTE_PATH_TO_CONFIG_FILE\n'

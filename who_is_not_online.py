@@ -60,22 +60,33 @@ def get_vhosts(servicesUrl):
                 vhosts.append(vhost)
     return vhosts
 
+def request(vhost):
+    notresponding = False
+    arguments = {}
+    try:
+        session = requests.Session()
+        r = session.get("http://" + vhost, timeout=20)
+        r.raise_for_status()
+    except requests.RequestException, args:
+        arguments = args
+        notresponding = True
+    return notresponding, arguments
+
 def check_status(vhosts):
     vhosts_fail = {}
-    send = True
     for vhost in vhosts:
+        send = True
         if vhost in ALREADYSEND:
             if (time.time() - ALREADYSEND[vhost]) < 18000:
                 send = False
         if send:
-            try:
-                session = requests.Session()
-                r = session.get("http://" + vhost, timeout=20)
-                r.raise_for_status()
-            except requests.RequestException, args:
-                ALREADYSEND[vhost] = time.time()
-                print("Send an email")
-                vhosts_fail[vhost] = pprint.pformat(args.args)
+            notresponding, argts = request(vhost)
+            if notresponding:
+                ntres,args = request(vhost)
+                if ntres:
+                    ALREADYSEND[vhost] = time.time()
+                    print("Send an email")
+                    vhosts_fail[vhost] = pprint.pformat(args.args)
     return vhosts_fail
 
 def main(parms):

@@ -4,8 +4,17 @@ import websocket
 import json
 import requests
 import monitoring
+import pprint
 
 PARAMS = {}
+
+def get_logs(uuid):
+    session = requests.Session()
+    headers = {"Authorization": PARAMS.get('APIAUTH')}
+    r = session.get(PARAMS.get('TUTUMURL') + '/api/v1/container/' + uuid + '/logs/', headers=headers)
+    r.raise_for_status()
+    logs = r.json().get("logs")
+    return logs
 
 def call_api(url):
     session = requests.Session()
@@ -13,15 +22,16 @@ def call_api(url):
     r = session.get(PARAMS.get('TUTUMURL') + url, headers=headers)
     r.raise_for_status()
     container = r.json()
-    name = container.get("name")
+    name = container.get("name").lower()
     uuid = container.get("uuid")
     send = True
     for exclude in PARAMS.get('CONTAINERSTOEXCLUDE'):
         if name.startswith(exclude.lower()):
             send = False
     if send:
+        logs = get_logs(uuid)
         print("Send an email")
-        monitoring.send_mail_ws(name, uuid)
+        monitoring.send_mail_ws(name, uuid, logs)
 
 
 def on_error(ws, error):
